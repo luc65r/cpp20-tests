@@ -9,6 +9,8 @@
     in {
       devShell = pkgs.mkShell {
         nativeBuildInputs = with pkgs; [
+          build2
+          gcc11
           gdb
         ];
       };

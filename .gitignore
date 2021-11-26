@@ -1,2 +1,6 @@
 /.direnv
 /build
+*.o
+*.d
+*.lz4
+*.gcm
