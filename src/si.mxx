@@ -16,29 +16,29 @@ inline constexpr bool is_ratio_v = is_ratio<T>::value;
 
 export namespace si {
 
-template< typename Second = ratio<0>
-        , typename Metre = ratio<0>
+template< typename Second   = ratio<0>
+        , typename Metre    = ratio<0>
         , typename Kilogram = ratio<0>
-        , typename Ampere = ratio<0>
-        , typename Kelvin = ratio<0>
-        , typename Mole = ratio<0>
-        , typename Candela = ratio<0>
+        , typename Ampere   = ratio<0>
+        , typename Kelvin   = ratio<0>
+        , typename Mole     = ratio<0>
+        , typename Candela  = ratio<0>
         >
 requires is_ratio_v<Second>
-    && is_ratio_v<Metre>
-    && is_ratio_v<Kilogram>
-    && is_ratio_v<Ampere>
-    && is_ratio_v<Kelvin>
-    && is_ratio_v<Mole>
-    && is_ratio_v<Candela>
+      && is_ratio_v<Metre>
+      && is_ratio_v<Kilogram>
+      && is_ratio_v<Ampere>
+      && is_ratio_v<Kelvin>
+      && is_ratio_v<Mole>
+      && is_ratio_v<Candela>
 struct Unit {
-    using s = Second;
-    using m = Metre;
-    using kg = Kilogram;
-    using A = Ampere;
-    using K = Kelvin;
+    using s   = Second;
+    using m   = Metre;
+    using kg  = Kilogram;
+    using A   = Ampere;
+    using K   = Kelvin;
     using mol = Mole;
-    using cd = Candela;
+    using cd  = Candela;
 };
 
 template<typename U, typename V>
