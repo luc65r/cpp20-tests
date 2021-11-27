@@ -1,7 +1,8 @@
 export module si;
 
-import <ratio>;
 import <compare>;
+import <ratio>;
+import <ostream>;
 
 using std::ratio, std::ratio_add, std::ratio_subtract, std::ratio_multiply;
 
@@ -12,7 +13,7 @@ template<intmax_t N, intmax_t D>
 struct is_ratio<ratio<N, D>> : std::true_type {};
 
 template<typename T>
-inline constexpr bool is_ratio_v = is_ratio<T>::value;
+inline constexpr bool is_ratio_v{is_ratio<T>::value};
 
 export namespace si {
 
@@ -41,8 +42,34 @@ struct Unit {
     using cd  = Candela;
 };
 
+template<typename>
+struct is_unit : std::false_type {};
+
+template< typename s
+        , typename m
+        , typename kg
+        , typename A
+        , typename K
+        , typename mol
+        , typename cd
+        >
+struct is_unit<Unit<s, m, kg, A, K, mol, cd>> : std::true_type {};
+
+template<typename T>
+inline constexpr bool is_unit_v{is_unit<T>::value};
+
+using Scalar   = Unit<>;
+using Second   = Unit<ratio<1>>;
+using Meter    = Unit<ratio<0>, ratio<1>>;
+using Kilogram = Unit<ratio<0>, ratio<0>, ratio<1>>;
+using Ampere   = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+using Kelvin   = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+using Mole     = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+using Candela  = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+
 template<typename U, typename V>
-using UnitAdd = Unit< ratio_add<typename U::s, typename V::s>
+requires is_unit_v<U> && is_unit_v<V>
+using UnitMul = Unit< ratio_add<typename U::s, typename V::s>
                     , ratio_add<typename U::m, typename V::m>
                     , ratio_add<typename U::kg, typename V::kg>
                     , ratio_add<typename U::A, typename V::A>
@@ -52,7 +79,8 @@ using UnitAdd = Unit< ratio_add<typename U::s, typename V::s>
                     >;
 
 template<typename U, typename V>
-using UnitSub = Unit< ratio_subtract<typename U::s, typename V::s>
+requires is_unit_v<U> && is_unit_v<V>
+using UnitDiv = Unit< ratio_subtract<typename U::s, typename V::s>
                     , ratio_subtract<typename U::m, typename V::m>
                     , ratio_subtract<typename U::kg, typename V::kg>
                     , ratio_subtract<typename U::A, typename V::A>
@@ -61,8 +89,13 @@ using UnitSub = Unit< ratio_subtract<typename U::s, typename V::s>
                     , ratio_subtract<typename U::cd, typename V::cd>
                     >;
 
+template<typename U>
+requires is_unit_v<U>
+using UnitInv = UnitDiv<Scalar, U>;
+
 template<typename U, typename K>
-using UnitMul = Unit< ratio_multiply<typename U::s, K>
+requires is_unit_v<U> && is_ratio_v<K>
+using UnitExp = Unit< ratio_multiply<typename U::s, K>
                     , ratio_multiply<typename U::m, K>
                     , ratio_multiply<typename U::kg, K>
                     , ratio_multiply<typename U::A, K>
@@ -71,15 +104,8 @@ using UnitMul = Unit< ratio_multiply<typename U::s, K>
                     , ratio_multiply<typename U::cd, K>
                     >;
 
-using Second   = Unit<ratio<1>>;
-using Meter    = Unit<ratio<0>, ratio<1>>;
-using Kilogram = Unit<ratio<0>, ratio<0>, ratio<1>>;
-using Ampere   = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
-using Kelvin   = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
-using Mole     = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
-using Candela  = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
-
 template<typename U>
+requires is_unit_v<U>
 struct Measurement {
     double value;
 
@@ -91,6 +117,10 @@ struct Measurement {
 
     inline constexpr auto operator==(const Measurement &rhs) const {
         return value == rhs.value;
+    }
+
+    inline constexpr friend auto operator<<(std::ostream &out, const Measurement &m) -> std::ostream & {
+        return out << m.value;
     }
 
     inline constexpr auto operator+=(const Measurement &rhs) -> Measurement & {
@@ -115,9 +145,9 @@ struct Measurement {
 
     template<typename V>
     inline constexpr auto operator*(const Measurement<V> &rhs) const
-        -> Measurement<UnitAdd<U, V>>
+        -> Measurement<UnitMul<U, V>>
     {
-        return Measurement<UnitAdd<U, V>>{value * rhs.value};
+        return Measurement<UnitMul<U, V>>{value * rhs.value};
     }
 
     inline constexpr auto operator*=(double rhs) -> Measurement & {
@@ -136,9 +166,9 @@ struct Measurement {
 
     template<typename V>
     inline constexpr auto operator/(const Measurement<V> &rhs) const
-        -> Measurement<UnitSub<U, V>>
+        -> Measurement<UnitDiv<U, V>>
     {
-        return Measurement<UnitSub<U, V>>{value / rhs.value};
+        return Measurement<UnitDiv<U, V>>{value / rhs.value};
     }
 
     inline constexpr auto operator/=(double rhs) -> Measurement & {
@@ -147,14 +177,54 @@ struct Measurement {
     }
 
     inline constexpr friend auto operator/(Measurement lhs, double rhs) -> Measurement {
-        lhs *= rhs;
+        lhs /= rhs;
         return lhs;
     }
 
     inline constexpr friend auto operator/(double lhs, Measurement rhs) -> Measurement {
-        return rhs * lhs;
+        return rhs / lhs;
     }
 };
+
+inline constexpr auto operator+(Measurement<Scalar> lhs, double rhs) -> Measurement<Scalar> {
+    lhs.value += rhs;
+    return lhs;
+}
+
+inline constexpr auto operator+(double lhs, Measurement<Scalar> rhs) -> Measurement<Scalar> {
+    return rhs + lhs;
+}
+
+inline constexpr auto operator-(Measurement<Scalar> lhs, double rhs) -> Measurement<Scalar> {
+    lhs.value -= rhs;
+    return lhs;
+}
+
+inline constexpr auto operator-(double lhs, Measurement<Scalar> rhs) -> Measurement<Scalar> {
+    return rhs - lhs;
+}
+
+using Hertz = UnitInv<Second>;
+using Newton = UnitDiv<UnitMul<Kilogram, Meter>, UnitExp<Second, ratio<2>>>;
+using Joule = UnitMul<Newton, Meter>;
+using Coulomb = UnitMul<Ampere, Second>;
+using Radian = UnitDiv<Meter, Meter>;
+using Steradian = UnitDiv<UnitExp<Meter, ratio<2>>, UnitExp<Meter, ratio<2>>>;
+using Lumen = UnitMul<Candela, Steradian>;
+using Watt = UnitDiv<Joule, Second>;
+using Pascal = UnitDiv<Newton, UnitExp<Meter, ratio<2>>>;
+using Volt = UnitDiv<Watt, Ampere>;
+using Farad = UnitDiv<Coulomb, Volt>;
+using Ohm = UnitDiv<Volt, Ampere>;
+using Siemens = UnitInv<Ohm>;
+using Weber = UnitMul<Volt, Second>;
+using Tesla = UnitDiv<Weber, UnitExp<Meter, ratio<2>>>;
+using Henry = UnitDiv<Weber, Ampere>;
+using Lux = UnitDiv<Lumen, UnitExp<Meter, ratio<2>>>;
+using Becquerel = UnitInv<Second>;
+using Gray = UnitDiv<Joule, Kilogram>;
+using Sievert = UnitDiv<Joule, Kilogram>;
+using Katal = UnitDiv<Mole, Second>;
 
 inline constexpr auto operator""_s(long double x) -> Measurement<Second> {
     return Measurement<Second>{static_cast<double>(x)};
@@ -183,5 +253,93 @@ inline constexpr auto operator""_mol(long double x) -> Measurement<Mole> {
 inline constexpr auto operator""_cd(long double x) -> Measurement<Candela> {
     return Measurement<Candela>{static_cast<double>(x)};
 }
+
+inline constexpr auto operator""_Hz(long double x) -> Measurement<Hertz> {
+    return Measurement<Hertz>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_rad(long double x) -> Measurement<Radian> {
+    return Measurement<Radian>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_sr(long double x) -> Measurement<Steradian> {
+    return Measurement<Steradian>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_N(long double x) -> Measurement<Newton> {
+    return Measurement<Newton>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_Pa(long double x) -> Measurement<Pascal> {
+    return Measurement<Pascal>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_J(long double x) -> Measurement<Joule> {
+    return Measurement<Joule>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_W(long double x) -> Measurement<Watt> {
+    return Measurement<Watt>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_C(long double x) -> Measurement<Coulomb> {
+    return Measurement<Coulomb>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_V(long double x) -> Measurement<Volt> {
+    return Measurement<Volt>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_F(long double x) -> Measurement<Farad> {
+    return Measurement<Farad>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_S(long double x) -> Measurement<Siemens> {
+    return Measurement<Siemens>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_Wb(long double x) -> Measurement<Weber> {
+    return Measurement<Weber>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_T(long double x) -> Measurement<Tesla> {
+    return Measurement<Tesla>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_H(long double x) -> Measurement<Henry> {
+    return Measurement<Henry>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_lm(long double x) -> Measurement<Lumen> {
+    return Measurement<Lumen>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_lx(long double x) -> Measurement<Lux> {
+    return Measurement<Lux>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_Bq(long double x) -> Measurement<Becquerel> {
+    return Measurement<Becquerel>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_Gy(long double x) -> Measurement<Gray> {
+    return Measurement<Gray>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_Sv(long double x) -> Measurement<Sievert> {
+    return Measurement<Sievert>{static_cast<double>(x)};
+}
+
+inline constexpr auto operator""_kat(long double x) -> Measurement<Katal> {
+    return Measurement<Katal>{static_cast<double>(x)};
+}
+
+inline constexpr Measurement<Hertz> ΔνCs{9'192'631'770};
+inline constexpr Measurement<UnitMul<Meter, Second>> c{299'792'458};
+inline constexpr Measurement<UnitMul<Joule, Second>> h{6.626'070'15e-34};
+inline constexpr Measurement<Coulomb> e{1.602'176'634e-19};
+inline constexpr Measurement<UnitDiv<Joule, Kelvin>> k{1.380'649e-23};
+inline constexpr Measurement<UnitInv<Mole>> NA{6.022'140'76e23};
+inline constexpr Measurement<UnitDiv<Lumen, Watt>> Kcd{683};
 
 }
