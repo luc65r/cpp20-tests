@@ -83,104 +83,104 @@ template<typename U>
 struct Measurement {
     double value;
 
-    Measurement(double value) : value(value) {}
+    inline constexpr Measurement(double value) : value(value) {}
 
-    auto operator<=>(const Measurement &rhs) const {
+    inline constexpr auto operator<=>(const Measurement &rhs) const {
         return value <=> rhs.value;
     }
 
-    auto operator==(const Measurement &rhs) const {
+    inline constexpr auto operator==(const Measurement &rhs) const {
         return value == rhs.value;
     }
 
-    auto operator+=(const Measurement &rhs) -> Measurement & {
+    inline constexpr auto operator+=(const Measurement &rhs) -> Measurement & {
         value += rhs.value;
         return *this;
     }
 
-    friend auto operator+(Measurement lhs, const Measurement &rhs) -> Measurement {
+    inline constexpr friend auto operator+(Measurement lhs, const Measurement &rhs) -> Measurement {
         lhs += rhs;
         return lhs;
     }
 
-    auto operator-=(const Measurement &rhs) -> Measurement & {
+    inline constexpr auto operator-=(const Measurement &rhs) -> Measurement & {
         value -= rhs.value;
         return *this;
     }
 
-    friend auto operator-(Measurement lhs, const Measurement &rhs) -> Measurement {
+    inline constexpr friend auto operator-(Measurement lhs, const Measurement &rhs) -> Measurement {
         lhs -= rhs;
         return lhs;
     }
 
     template<typename V>
-    auto operator*(const Measurement<V> &rhs) const
+    inline constexpr auto operator*(const Measurement<V> &rhs) const
         -> Measurement<UnitAdd<U, V>>
     {
         return Measurement<UnitAdd<U, V>>{value * rhs.value};
     }
 
-    auto operator*=(double rhs) -> Measurement & {
+    inline constexpr auto operator*=(double rhs) -> Measurement & {
         value *= rhs;
         return *this;
     }
 
-    friend auto operator*(Measurement lhs, double rhs) -> Measurement {
+    inline constexpr friend auto operator*(Measurement lhs, double rhs) -> Measurement {
         lhs *= rhs;
         return lhs;
     }
 
-    friend auto operator*(double lhs, Measurement rhs) -> Measurement {
+    inline constexpr friend auto operator*(double lhs, Measurement rhs) -> Measurement {
         return rhs * lhs;
     }
 
     template<typename V>
-    auto operator/(const Measurement<V> &rhs) const
+    inline constexpr auto operator/(const Measurement<V> &rhs) const
         -> Measurement<UnitSub<U, V>>
     {
         return Measurement<UnitSub<U, V>>{value / rhs.value};
     }
 
-    auto operator/=(double rhs) -> Measurement & {
+    inline constexpr auto operator/=(double rhs) -> Measurement & {
         value /= rhs;
         return *this;
     }
 
-    friend auto operator/(Measurement lhs, double rhs) -> Measurement {
+    inline constexpr friend auto operator/(Measurement lhs, double rhs) -> Measurement {
         lhs *= rhs;
         return lhs;
     }
 
-    friend auto operator/(double lhs, Measurement rhs) -> Measurement {
+    inline constexpr friend auto operator/(double lhs, Measurement rhs) -> Measurement {
         return rhs * lhs;
     }
 };
 
-auto operator""_s(long double x) -> Measurement<Second> {
+inline constexpr auto operator""_s(long double x) -> Measurement<Second> {
     return Measurement<Second>{static_cast<double>(x)};
 }
 
-auto operator""_m(long double x) -> Measurement<Meter> {
+inline constexpr auto operator""_m(long double x) -> Measurement<Meter> {
     return Measurement<Meter>{static_cast<double>(x)};
 }
 
-auto operator""_kg(long double x) -> Measurement<Kilogram> {
+inline constexpr auto operator""_kg(long double x) -> Measurement<Kilogram> {
     return Measurement<Kilogram>{static_cast<double>(x)};
 }
 
-auto operator""_A(long double x) -> Measurement<Ampere> {
+inline constexpr auto operator""_A(long double x) -> Measurement<Ampere> {
     return Measurement<Ampere>{static_cast<double>(x)};
 }
 
-auto operator""_K(long double x) -> Measurement<Kelvin> {
+inline constexpr auto operator""_K(long double x) -> Measurement<Kelvin> {
     return Measurement<Kelvin>{static_cast<double>(x)};
 }
 
-auto operator""_mol(long double x) -> Measurement<Mole> {
+inline constexpr auto operator""_mol(long double x) -> Measurement<Mole> {
     return Measurement<Mole>{static_cast<double>(x)};
 }
 
-auto operator""_cd(long double x) -> Measurement<Candela> {
+inline constexpr auto operator""_cd(long double x) -> Measurement<Candela> {
     return Measurement<Candela>{static_cast<double>(x)};
 }
 
