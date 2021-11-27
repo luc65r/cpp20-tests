@@ -133,98 +133,98 @@ requires is_unit_v<U>
 struct Measurement {
     double value;
 
-    inline constexpr Measurement(double value) : value(value) {}
+    constexpr Measurement(double value) : value(value) {}
 
-    inline constexpr auto operator<=>(const Measurement &rhs) const {
+    constexpr auto operator<=>(const Measurement &rhs) const {
         return value <=> rhs.value;
     }
 
-    inline constexpr auto operator==(const Measurement &rhs) const {
+    constexpr auto operator==(const Measurement &rhs) const {
         return value == rhs.value;
     }
 
-    inline constexpr friend auto operator<<(std::ostream &out, const Measurement &m) -> std::ostream & {
+    constexpr friend auto operator<<(std::ostream &out, const Measurement &m) -> std::ostream & {
         return out << m.value << " " << U::to_string();
     }
 
-    inline constexpr auto operator+=(const Measurement &rhs) -> Measurement & {
+    constexpr auto operator+=(const Measurement &rhs) -> Measurement & {
         value += rhs.value;
         return *this;
     }
 
-    inline constexpr friend auto operator+(Measurement lhs, const Measurement &rhs) -> Measurement {
+    constexpr friend auto operator+(Measurement lhs, const Measurement &rhs) -> Measurement {
         lhs += rhs;
         return lhs;
     }
 
-    inline constexpr auto operator-=(const Measurement &rhs) -> Measurement & {
+    constexpr auto operator-=(const Measurement &rhs) -> Measurement & {
         value -= rhs.value;
         return *this;
     }
 
-    inline constexpr friend auto operator-(Measurement lhs, const Measurement &rhs) -> Measurement {
+    constexpr friend auto operator-(Measurement lhs, const Measurement &rhs) -> Measurement {
         lhs -= rhs;
         return lhs;
     }
 
     template<typename V>
-    inline constexpr auto operator*(const Measurement<V> &rhs) const
+    constexpr auto operator*(const Measurement<V> &rhs) const
         -> Measurement<UnitMul<U, V>>
     {
         return Measurement<UnitMul<U, V>>{value * rhs.value};
     }
 
-    inline constexpr auto operator*=(double rhs) -> Measurement & {
+    constexpr auto operator*=(double rhs) -> Measurement & {
         value *= rhs;
         return *this;
     }
 
-    inline constexpr friend auto operator*(Measurement lhs, double rhs) -> Measurement {
+    constexpr friend auto operator*(Measurement lhs, double rhs) -> Measurement {
         lhs *= rhs;
         return lhs;
     }
 
-    inline constexpr friend auto operator*(double lhs, Measurement rhs) -> Measurement {
+    constexpr friend auto operator*(double lhs, Measurement rhs) -> Measurement {
         return rhs * lhs;
     }
 
     template<typename V>
-    inline constexpr auto operator/(const Measurement<V> &rhs) const
+    constexpr auto operator/(const Measurement<V> &rhs) const
         -> Measurement<UnitDiv<U, V>>
     {
         return Measurement<UnitDiv<U, V>>{value / rhs.value};
     }
 
-    inline constexpr auto operator/=(double rhs) -> Measurement & {
+    constexpr auto operator/=(double rhs) -> Measurement & {
         value /= rhs;
         return *this;
     }
 
-    inline constexpr friend auto operator/(Measurement lhs, double rhs) -> Measurement {
+    constexpr friend auto operator/(Measurement lhs, double rhs) -> Measurement {
         lhs /= rhs;
         return lhs;
     }
 
-    inline constexpr friend auto operator/(double lhs, Measurement rhs) -> Measurement {
+    constexpr friend auto operator/(double lhs, Measurement rhs) -> Measurement {
         return rhs / lhs;
     }
 };
 
-inline constexpr auto operator+(Measurement<Scalar> lhs, double rhs) -> Measurement<Scalar> {
+constexpr auto operator+(Measurement<Scalar> lhs, double rhs) -> Measurement<Scalar> {
     lhs.value += rhs;
     return lhs;
 }
 
-inline constexpr auto operator+(double lhs, Measurement<Scalar> rhs) -> Measurement<Scalar> {
+constexpr auto operator+(double lhs, Measurement<Scalar> rhs) -> Measurement<Scalar> {
     return rhs + lhs;
 }
 
-inline constexpr auto operator-(Measurement<Scalar> lhs, double rhs) -> Measurement<Scalar> {
+constexpr auto operator-(Measurement<Scalar> lhs, double rhs) -> Measurement<Scalar> {
     lhs.value -= rhs;
     return lhs;
 }
 
-inline constexpr auto operator-(double lhs, Measurement<Scalar> rhs) -> Measurement<Scalar> {
+constexpr auto operator-(double lhs, Measurement<Scalar> rhs) -> Measurement<Scalar> {
     return rhs - lhs;
 }
 
@@ -250,111 +250,111 @@ using Gray = UnitDiv<Joule, Kilogram>;
 using Sievert = UnitDiv<Joule, Kilogram>;
 using Katal = UnitDiv<Mole, Second>;
 
-inline constexpr auto operator""_s(long double x) -> Measurement<Second> {
+constexpr auto operator""_s(long double x) -> Measurement<Second> {
     return Measurement<Second>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_m(long double x) -> Measurement<Meter> {
+constexpr auto operator""_m(long double x) -> Measurement<Meter> {
     return Measurement<Meter>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_kg(long double x) -> Measurement<Kilogram> {
+constexpr auto operator""_kg(long double x) -> Measurement<Kilogram> {
     return Measurement<Kilogram>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_A(long double x) -> Measurement<Ampere> {
+constexpr auto operator""_A(long double x) -> Measurement<Ampere> {
     return Measurement<Ampere>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_K(long double x) -> Measurement<Kelvin> {
+constexpr auto operator""_K(long double x) -> Measurement<Kelvin> {
     return Measurement<Kelvin>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_mol(long double x) -> Measurement<Mole> {
+constexpr auto operator""_mol(long double x) -> Measurement<Mole> {
     return Measurement<Mole>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_cd(long double x) -> Measurement<Candela> {
+constexpr auto operator""_cd(long double x) -> Measurement<Candela> {
     return Measurement<Candela>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_Hz(long double x) -> Measurement<Hertz> {
+constexpr auto operator""_Hz(long double x) -> Measurement<Hertz> {
     return Measurement<Hertz>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_rad(long double x) -> Measurement<Radian> {
+constexpr auto operator""_rad(long double x) -> Measurement<Radian> {
     return Measurement<Radian>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_sr(long double x) -> Measurement<Steradian> {
+constexpr auto operator""_sr(long double x) -> Measurement<Steradian> {
     return Measurement<Steradian>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_N(long double x) -> Measurement<Newton> {
+constexpr auto operator""_N(long double x) -> Measurement<Newton> {
     return Measurement<Newton>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_Pa(long double x) -> Measurement<Pascal> {
+constexpr auto operator""_Pa(long double x) -> Measurement<Pascal> {
     return Measurement<Pascal>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_J(long double x) -> Measurement<Joule> {
+constexpr auto operator""_J(long double x) -> Measurement<Joule> {
     return Measurement<Joule>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_W(long double x) -> Measurement<Watt> {
+constexpr auto operator""_W(long double x) -> Measurement<Watt> {
     return Measurement<Watt>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_C(long double x) -> Measurement<Coulomb> {
+constexpr auto operator""_C(long double x) -> Measurement<Coulomb> {
     return Measurement<Coulomb>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_V(long double x) -> Measurement<Volt> {
+constexpr auto operator""_V(long double x) -> Measurement<Volt> {
     return Measurement<Volt>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_F(long double x) -> Measurement<Farad> {
+constexpr auto operator""_F(long double x) -> Measurement<Farad> {
     return Measurement<Farad>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_S(long double x) -> Measurement<Siemens> {
+constexpr auto operator""_S(long double x) -> Measurement<Siemens> {
     return Measurement<Siemens>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_Wb(long double x) -> Measurement<Weber> {
+constexpr auto operator""_Wb(long double x) -> Measurement<Weber> {
     return Measurement<Weber>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_T(long double x) -> Measurement<Tesla> {
+constexpr auto operator""_T(long double x) -> Measurement<Tesla> {
     return Measurement<Tesla>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_H(long double x) -> Measurement<Henry> {
+constexpr auto operator""_H(long double x) -> Measurement<Henry> {
     return Measurement<Henry>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_lm(long double x) -> Measurement<Lumen> {
+constexpr auto operator""_lm(long double x) -> Measurement<Lumen> {
     return Measurement<Lumen>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_lx(long double x) -> Measurement<Lux> {
+constexpr auto operator""_lx(long double x) -> Measurement<Lux> {
     return Measurement<Lux>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_Bq(long double x) -> Measurement<Becquerel> {
+constexpr auto operator""_Bq(long double x) -> Measurement<Becquerel> {
     return Measurement<Becquerel>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_Gy(long double x) -> Measurement<Gray> {
+constexpr auto operator""_Gy(long double x) -> Measurement<Gray> {
     return Measurement<Gray>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_Sv(long double x) -> Measurement<Sievert> {
+constexpr auto operator""_Sv(long double x) -> Measurement<Sievert> {
     return Measurement<Sievert>{static_cast<double>(x)};
 }
 
-inline constexpr auto operator""_kat(long double x) -> Measurement<Katal> {
+constexpr auto operator""_kat(long double x) -> Measurement<Katal> {
     return Measurement<Katal>{static_cast<double>(x)};
 }
 
