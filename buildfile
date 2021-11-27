@@ -5,6 +5,7 @@ using cxx
 
 cxx.coptions += -Og -march=native -ggdb
 cxx.coptions += -Wall -Wextra -Wconversion -Wpedantic
+cxx.loptions += -flto=auto
 
 mxx{src/*}: extension = mxx
 cxx{src/*}: extension = cxx
