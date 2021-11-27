@@ -5,11 +5,14 @@ import si;
 
 auto main() -> int {
     using namespace si;
-    auto a = 4._kg;
-    auto b = .2_kg;
-    auto c = a * b;
-    c *= 54;
-    auto d = c * c;
-    std::cout << d.value << std::endl;
+
+    double α = 0.0072973525693;
+    auto ε₀ = (e * e) / (2 * α * h * c);
+    std::cout << "ε₀ = " << ε₀ << std::endl;
+    Measurement<UnitExp<Meter, std::ratio<2>>> S = 20e6;
+
+    auto C = (ε₀ * S) / 1000;
+    std::cout << "C = " << C << std::endl;
+
     return 0;
 }

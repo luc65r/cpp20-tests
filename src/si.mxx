@@ -1,5 +1,6 @@
 export module si;
 
+import <array>;
 import <compare>;
 import <ratio>;
 import <ostream>;
@@ -32,7 +33,25 @@ requires is_ratio_v<Second>
       && is_ratio_v<Kelvin>
       && is_ratio_v<Mole>
       && is_ratio_v<Candela>
-struct Unit {
+class Unit {
+    template<typename U>
+    static constexpr auto f(std::string s) -> std::string {
+        auto n{U::num}, d{U::den};
+        std::array<const char *, 10> superscripts{
+            "⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"
+        };
+        if (n == 0) {
+            return {};
+        } else if (d == 1) {
+            if (n == 1) {
+                return s;
+            } else if (std::abs(n) < 10) {
+                return s + (n < 0 ? "⁻" : "") + superscripts[std::abs(n)];
+            }
+        }
+        return "TODO";
+    }
+public:
     using s   = Second;
     using m   = Metre;
     using kg  = Kilogram;
@@ -40,6 +59,11 @@ struct Unit {
     using K   = Kelvin;
     using mol = Mole;
     using cd  = Candela;
+
+    static constexpr auto to_string() -> std::string {
+        return f<s>("s") + f<m>("m") + f<kg>("kg") + f<A>("A")
+            + f<K>("K") + f<mol>("mol") + f<cd>("cd");
+    }
 };
 
 template<typename>
@@ -120,7 +144,7 @@ struct Measurement {
     }
 
     inline constexpr friend auto operator<<(std::ostream &out, const Measurement &m) -> std::ostream & {
-        return out << m.value;
+        return out << m.value << " " << U::to_string();
     }
 
     inline constexpr auto operator+=(const Measurement &rhs) -> Measurement & {
