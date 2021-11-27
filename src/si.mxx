@@ -1,5 +1,171 @@
 export module si;
 
+import <ratio>;
+import <compare>;
+
 export namespace si {
-    void test() {}
+
+using std::ratio, std::ratio_add, std::ratio_subtract, std::ratio_multiply;
+
+template< typename Second = ratio<0>
+        , typename Metre = ratio<0>
+        , typename Kilogram = ratio<0>
+        , typename Ampere = ratio<0>
+        , typename Kelvin = ratio<0>
+        , typename Mole = ratio<0>
+        , typename Candela = ratio<0>
+        >
+struct Unit {
+    using s = Second;
+    using m = Metre;
+    using kg = Kilogram;
+    using A = Ampere;
+    using K = Kelvin;
+    using mol = Mole;
+    using cd = Candela;
+};
+
+template<typename U, typename V>
+using UnitAdd = Unit< ratio_add<typename U::s, typename V::s>
+                    , ratio_add<typename U::m, typename V::m>
+                    , ratio_add<typename U::kg, typename V::kg>
+                    , ratio_add<typename U::A, typename V::A>
+                    , ratio_add<typename U::K, typename V::K>
+                    , ratio_add<typename U::mol, typename V::mol>
+                    , ratio_add<typename U::cd, typename V::cd>
+                    >;
+
+template<typename U, typename V>
+using UnitSub = Unit< ratio_subtract<typename U::s, typename V::s>
+                    , ratio_subtract<typename U::m, typename V::m>
+                    , ratio_subtract<typename U::kg, typename V::kg>
+                    , ratio_subtract<typename U::A, typename V::A>
+                    , ratio_subtract<typename U::K, typename V::K>
+                    , ratio_subtract<typename U::mol, typename V::mol>
+                    , ratio_subtract<typename U::cd, typename V::cd>
+                    >;
+
+template<typename U, typename K>
+using UnitMul = Unit< ratio_multiply<typename U::s, K>
+                    , ratio_multiply<typename U::m, K>
+                    , ratio_multiply<typename U::kg, K>
+                    , ratio_multiply<typename U::A, K>
+                    , ratio_multiply<typename U::K, K>
+                    , ratio_multiply<typename U::mol, K>
+                    , ratio_multiply<typename U::cd, K>
+                    >;
+
+using Second   = Unit<ratio<1>>;
+using Meter    = Unit<ratio<0>, ratio<1>>;
+using Kilogram = Unit<ratio<0>, ratio<0>, ratio<1>>;
+using Ampere   = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+using Kelvin   = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+using Mole     = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+using Candela  = Unit<ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<0>, ratio<1>>;
+
+template<typename U>
+struct Measurement {
+    double value;
+
+    Measurement(double value) : value(value) {}
+
+    auto operator<=>(const Measurement &rhs) const {
+        return value <=> rhs.value;
+    }
+
+    auto operator==(const Measurement &rhs) const {
+        return value == rhs.value;
+    }
+
+    auto operator+=(const Measurement &rhs) -> Measurement & {
+        value += rhs.value;
+        return *this;
+    }
+
+    friend auto operator+(Measurement lhs, const Measurement &rhs) -> Measurement {
+        lhs += rhs;
+        return lhs;
+    }
+
+    auto operator-=(const Measurement &rhs) -> Measurement & {
+        value -= rhs.value;
+        return *this;
+    }
+
+    friend auto operator-(Measurement lhs, const Measurement &rhs) -> Measurement {
+        lhs -= rhs;
+        return lhs;
+    }
+
+    template<typename V>
+    auto operator*(const Measurement<V> &rhs) const
+        -> Measurement<UnitAdd<U, V>>
+    {
+        return Measurement<UnitAdd<U, V>>{value * rhs.value};
+    }
+
+    auto operator*=(double rhs) -> Measurement & {
+        value *= rhs;
+        return *this;
+    }
+
+    friend auto operator*(Measurement lhs, double rhs) -> Measurement {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    friend auto operator*(double lhs, Measurement rhs) -> Measurement {
+        return rhs * lhs;
+    }
+
+    template<typename V>
+    auto operator/(const Measurement<V> &rhs) const
+        -> Measurement<UnitSub<U, V>>
+    {
+        return Measurement<UnitSub<U, V>>{value / rhs.value};
+    }
+
+    auto operator/=(double rhs) -> Measurement & {
+        value /= rhs;
+        return *this;
+    }
+
+    friend auto operator/(Measurement lhs, double rhs) -> Measurement {
+        lhs *= rhs;
+        return lhs;
+    }
+
+    friend auto operator/(double lhs, Measurement rhs) -> Measurement {
+        return rhs * lhs;
+    }
+};
+
+auto operator""_s(long double x) -> Measurement<Second> {
+    return Measurement<Second>{static_cast<double>(x)};
+}
+
+auto operator""_m(long double x) -> Measurement<Meter> {
+    return Measurement<Meter>{static_cast<double>(x)};
+}
+
+auto operator""_kg(long double x) -> Measurement<Kilogram> {
+    return Measurement<Kilogram>{static_cast<double>(x)};
+}
+
+auto operator""_A(long double x) -> Measurement<Ampere> {
+    return Measurement<Ampere>{static_cast<double>(x)};
+}
+
+auto operator""_K(long double x) -> Measurement<Kelvin> {
+    return Measurement<Kelvin>{static_cast<double>(x)};
+}
+
+auto operator""_mol(long double x) -> Measurement<Mole> {
+    return Measurement<Mole>{static_cast<double>(x)};
+}
+
+auto operator""_cd(long double x) -> Measurement<Candela> {
+    return Measurement<Candela>{static_cast<double>(x)};
+}
+
 }
