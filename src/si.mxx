@@ -36,7 +36,7 @@ requires is_ratio_v<Kilogram>
 class Unit {
     template<typename U>
     static constexpr auto f(std::string s) -> std::string {
-        auto n{U::num}, d{U::den};
+        const auto n{U::num}, d{U::den};
         std::array<const char *, 10> superscripts{
             "⁰", "¹", "²", "³", "⁴", "⁵", "⁶", "⁷", "⁸", "⁹"
         };
