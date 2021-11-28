@@ -359,7 +359,7 @@ constexpr auto operator""_kat(long double x) -> Measurement<Katal> {
 }
 
 inline constexpr Measurement<Hertz> ΔνCs{9'192'631'770};
-inline constexpr Measurement<UnitMul<Meter, Second>> c{299'792'458};
+inline constexpr Measurement<UnitDiv<Meter, Second>> c{299'792'458};
 inline constexpr Measurement<UnitMul<Joule, Second>> h{6.626'070'15e-34};
 inline constexpr Measurement<Coulomb> e{1.602'176'634e-19};
 inline constexpr Measurement<UnitDiv<Joule, Kelvin>> k{1.380'649e-23};

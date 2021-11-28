@@ -11,7 +11,7 @@ auto main() -> int {
     std::cout << "ε₀ = " << ε₀ << std::endl;
     Measurement<UnitExp<Meter, std::ratio<2>>> S = 20e6;
 
-    auto C = (ε₀ * S) / 1000;
+    Measurement<Farad> C = (ε₀ * S) / 1000._m;
     std::cout << "C = " << C << std::endl;
 
     return 0;
